@@ -43,3 +43,10 @@ function clihelp() {
   echo -e '\tTab – Autocomplete current command/argment';
   echo -e '\r\f';
 }
+
+# Edit File and then Git Add with Status
+function editadd() {
+  editor "$1"
+  git add "$1"
+  git status -s
+}
