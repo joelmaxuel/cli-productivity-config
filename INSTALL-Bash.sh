@@ -14,5 +14,5 @@ cp ./Bash/.bashrc ~/
 cp ./Bash/.bash_functions ~/
 
 echo
-echo Done ... Enjoy!
+echo Done.  Restart Bash \(type \'bash\' or reload your terminal\) to enjoy!
 echo

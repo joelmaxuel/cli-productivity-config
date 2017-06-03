@@ -16,5 +16,5 @@ echo Copying functions ...
 cp ./fish/functions/* ~/.config/fish/functions/
 
 echo
-echo Done ... Enjoy!
+echo Done.  Restart fish \(type \'exec fish\' or reload your terminal\) to enjoy!
 echo
