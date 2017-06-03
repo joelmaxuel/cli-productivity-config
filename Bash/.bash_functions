@@ -51,3 +51,8 @@ function editadd() {
   git add "$1"
   git status -s
 }
+
+# Make Directory and then Go Into
+function mkd() {
+	mkdir -p "$@" && cd "$@"
+}
