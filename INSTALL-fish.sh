@@ -3,20 +3,15 @@
 echo
 echo CLI Productivity Config - Install Script for fish
 echo
-echo Checking for fish config directory ...
+echo Checking for fish functions directory ...
 
-if [ ! -d ~/.config/fish ];
+if [ ! -d ~/.config/fish/functions ];
 then
-    mkdir ~/.config/fish
+    mkdir -p ~/.config/fish/functions
 fi
 
 echo
 echo Copying functions ...
-
-if [ ! -d ~/.config/fish/functions ];
-then
-    mkdir ~/.config/fish/functions
-fi
 
 cp ./fish/functions/* ~/.config/fish/functions/
 
