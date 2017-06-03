@@ -29,6 +29,7 @@ function mcd() {
 function clihelp() {
   echo -e '\r\fKeyboard Shortcuts:';
   echo -e '\tCTRL + C – Cancels current command';
+  echo -e '\tCTRL + S – Repeats the last command with sudo';
   echo -e '\tCTRL + U – Cuts text up until the cursor';
   echo -e '\tCTRL + K – Cuts text from the cursor until the end of the line';
   echo -e '\tCTRL + W – Cut word behind cursor';

@@ -107,9 +107,10 @@ fi
 
 # Special keybindings
 # Unlike those in ~/.inputrc, these ones will not modify or interrupt
-# the currently entered command.
+# the currently entered command (when '-x' is used).
 
 bind -x '"\C-h":"clihelp"'
+bind '"\C-s":"sudo !!\n"'
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
