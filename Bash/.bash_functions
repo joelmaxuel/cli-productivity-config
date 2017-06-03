@@ -5,7 +5,7 @@
 function cdb() {
   select dir in $(find -type d -name "$1" -not -path '*/\.*' -prune);
   do
-    cd "${dir}" && break;
+    command cd "${dir}" && break;
   done 
 }
 
@@ -19,8 +19,8 @@ function cd ()
 
 # Menu-based Change Directory
 function mcd() {
-  select dir in $(dirs -p | sort | uniq);
+  select dir in $(dirs -p -l | sort | uniq);
   do
-    cd "${dir}" && break;
+    command cd "${dir}" && break;
   done 
 }
