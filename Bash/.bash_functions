@@ -12,6 +12,10 @@ function cdb() {
 #let cd also pushd directories into stack. Use popd to reverse stack
 function cd ()
 {
+  if [ $# -eq 0 ]; then
+    pushd $HOME &> /dev/null
+    command cd $HOME && return 0;
+  fi
   if [ -e $1 ]; then 
     pushd $1 &> /dev/null   #dont display current stack 
   fi
@@ -19,9 +23,12 @@ function cd ()
 
 # Menu-based Change Directory
 function mcd() {
+  CWD=$PWD
   select dir in $(dirs -p -l | sort | uniq);
   do
-    command cd "${dir}" && break;
+    command cd "${dir}"
+	pushd $CWD &> /dev/null
+	break
   done 
 }
 
