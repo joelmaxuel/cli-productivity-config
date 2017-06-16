@@ -60,6 +60,6 @@ function editadd() {
 }
 
 # Make Directory and then Go Into
-function mkd() {
+function mked() {
 	mkdir -p "$@" && cd "$@"
 }
