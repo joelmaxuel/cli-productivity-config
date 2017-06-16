@@ -63,3 +63,8 @@ function editadd() {
 function mked() {
 	mkdir -p "$@" && cd "$@"
 }
+
+# Track runtime of a program and return one value on exit
+function timer() {
+	/usr/bin/time -f "\t Ran for %E min:sec" "$@"
+}
