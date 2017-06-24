@@ -37,6 +37,7 @@ function clihelp() {
   echo -e '\r\fKeyboard Shortcuts:';
   echo -e '\tCTRL + C – Cancels current command';
   echo -e '\tCTRL + S – Repeats the last command with sudo';
+  echo -e '\tCTRL + L – Provide directory listing in current working directory';
   echo -e '\tCTRL + U – Cuts text up until the cursor';
   echo -e '\tCTRL + K – Cuts text from the cursor until the end of the line';
   echo -e '\tCTRL + W – Cut word behind cursor';
@@ -67,4 +68,9 @@ function mked() {
 # Track runtime of a program and return one value on exit
 function timer() {
 	/usr/bin/time -f "\t Ran for %E min:sec" "$@"
+}
+
+# Directory listing with columns and colour
+function dirw() {
+	ls -F --color | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)([^\e]{20})[^\e]*(.*)/$1$2...$3/s; print' | column -x
 }

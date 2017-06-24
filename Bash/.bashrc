@@ -111,6 +111,7 @@ fi
 
 bind -x '"\C-h":"clihelp"'
 bind '"\C-s":"sudo !!\n"'
+bind -x '"\C-l":"dirw"'
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
