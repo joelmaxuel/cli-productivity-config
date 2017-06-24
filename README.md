@@ -8,7 +8,7 @@
 
 Designed for Bash and fish for the Linux shell, this repo is a collection of scripts to, as said above, allow the end user to be more productive.
 
-Inspired by a friend who runs DOS to this day - he has (possibly) hundreds of batch files to improve his command line experience.  Although some are situational (based on his personal directory structure), it has and will give me inspiration for something similar in Linux.
+Inspired by a friend who runs DOS to this day - he has over a thousand batch files to improve (and simplify) his command line experience.  Although many are situational (based on his personal directory structure, for example), it has and will give me inspiration for something similar in Linux.
 
 
 
@@ -16,6 +16,7 @@ Inspired by a friend who runs DOS to this day - he has (possibly) hundreds of ba
 
 - GNU Bash (I am using 4.4, but the requirements are probably way lower) and/or
 - fish, version 2.4.0 (quickly found myself upgrading to Debian Stretch for this)
+- BSDMainUtils, version 9.0.7 (this version ignores escape sequences) or higher
 
 
 
