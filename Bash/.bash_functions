@@ -74,3 +74,32 @@ function timer() {
 function dirw() {
 	ls -F --color $@ | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)([^\e]{20})[^\e]*(.*)/$1$2...$3/s; print' | column -x
 }
+
+# Directory listing of files modified today
+function dirtoday() {
+	eval "$(date +'today=%F now=%s')"
+	midnight=$(date -d "$today 0" +%s)
+	find * -maxdepth 0 -mmin -$((now - midnight)) -exec ls -F --color -d {} \; | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)([^\e]{20})[^\e]*(.*)/$1$2...$3/s; print' | column -x
+}
+
+# Directory listing of past X days
+function dirdays() {
+	find * -maxdepth 0 -mtime -$1 -exec ls -F --color -d {} \; | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)([^\e]{20})[^\e]*(.*)/$1$2...$3/s; print' | column -x
+}
+
+# Recursive file listing of past X days
+function dirrdays() {
+	find * -mtime -$1 -type f -not -path '*/\.*' -prune -exec ls -F --color {} \;
+}
+
+# Copy only files modified today
+function cptoday() {
+	eval "$(date +'today=%F now=%s')"
+	midnight=$(date -d "$today 0" +%s)
+	find * -maxdepth 0 -mmin -$((now - midnight)) -type f -exec cp {} $1 \;
+}
+
+# Copy only files of past X days
+function cpdays() {
+	find * -maxdepth 0 -mtime -$1 -type f -exec cp {} $2 \;
+}
