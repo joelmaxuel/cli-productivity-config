@@ -75,8 +75,8 @@ function dirw() {
 	ls -F --color $@ | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)([^\e]{20})[^\e]*(.*)/$1$2...$3/s; print' | column -x
 }
 
-# Directory listing of recent time frame
-function dirlast() {
+# Directory listing of a time frame
+function dir-core() {
 	set -f
 	criteriaunit=""
 	criteriavalue=0
@@ -87,6 +87,10 @@ function dirlast() {
 	lsoptions=""
 	reinteger='^[0-9]+$'
 
+	origcmd=$1
+	findirection=$2
+	shift 2
+	
 	case "$1" in
 		m) 
 			criteriaunit="-mmin";;
@@ -111,6 +115,7 @@ function dirlast() {
 		shift
 		if [[ $1 =~ $reinteger ]]; then criteriavalue=$(($1*$valuemodifier)); else entryerror=2; fi
 	fi
+
 	if [ $entryerror -eq 0 ]; then
 		shift
 		if [ "$1" != "" ]; then
@@ -145,18 +150,19 @@ function dirlast() {
 	
 	case "$entryerror" in
 		0) if [ "$recursive" == "" ] || [ "$lsoptions" == " -l" ]; then
-				find . $recursive $findfilter $criteriaunit -$criteriavalue -type f -not -path '*/\.*' -prune -exec ls $lsoptions -F --color -d {} \;
+				find . $recursive $findfilter $criteriaunit $findirection$criteriavalue -type f -not -path '*/\.*' -prune -exec ls $lsoptions -F --color -d {} \;
 			else
-				find . $recursive $findfilter $criteriaunit -$criteriavalue -type f -not -path '*/\.*' -prune -exec ls -F --color -d {} \; | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?([^\e]{20})[^\e]*(?:\.\/)?(.*)/$1$2...$3/s;s/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?(.*)/$1$2/s;print' | column -x
+				find . $recursive $findfilter $criteriaunit $findirection$criteriavalue -type f -not -path '*/\.*' -prune -exec ls -F --color -d {} \; | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?([^\e]{20})[^\e]*(?:\.\/)?(.*)/$1$2...$3/s;s/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?(.*)/$1$2/s;print' | column -x
 			fi;;
 		1) echo "Invalid Unit Specified.";;
 		2) echo "Invalid Integer Value.";;
 		*) echo "Unknown Error.";;
 	esac
 	set +f
+
 	if [ $entryerror -ne 0 ]; then
 		echo
-		echo "Usage: dirlast <unit> <value> ['namefilter'] [-lr]"
+		echo "Usage: $origcmd <unit> <value> ['namefilter'] [-lr]"
 		echo
 		echo Units:
 		echo -e "\t m \t minutes"
@@ -174,367 +180,158 @@ function dirlast() {
 	return 0
 }
 
-# Directory listing of previous time frame
+# Set action for files of a time frame
+function act-core() {
+	set -f
+	criteriaunit=""
+	criteriavalue=0
+	valuemodifier=1
+	entryerror=0
+	findfilter=""
+	actioncmd=""
+	actiondest=""
+	recursive="-maxdepth 1"
+	actquiet=0
+	reinteger='^[0-9]+$'
+
+	origcmd=$1
+	findirection=$2
+	shift 2
+
+	case "$1" in
+		m) 
+			criteriaunit="-mmin";;
+		h) 
+			criteriaunit="-mmin"
+			valuemodifier=60;;
+		d) 
+			criteriaunit="-mtime";;
+		D) 
+			criteriaunit="-daystart -mtime";;
+		w) 
+			criteriaunit="-mtime"
+			valuemodifier=7;;
+		W) 
+			criteriaunit="-daystart -mtime"
+			valuemodifier=7;;
+		*)
+			entryerror=1;;
+	esac
+
+	if [ $entryerror -eq 0 ]; then
+		shift
+		if [[ $1 =~ $reinteger ]]; then criteriavalue=$(($1*$valuemodifier)); else entryerror=2; fi
+	fi
+	
+	if [ $entryerror -eq 0 ]; then
+		shift
+		case "$1" in
+			cp|mv) 
+				actioncmd=$1
+				actiondest=$2
+				if ! [ -d $actiondest ]; then entryerror=4; fi
+				shift;;
+			rm) 
+				actioncmd=$1;;
+			*)
+				entryerror=3;;
+		esac
+	fi
+
+	if [ $entryerror -eq 0 ]; then
+		shift
+		if [ "$1" != "" ]; then
+			case "$1" in
+			-r)
+				recursive="";;
+			-q)
+				actquiet=1;;
+			-rq)
+				recursive=""
+				actquiet=1;;
+			-qr)
+				recursive=""
+				actquiet=1;;
+			*)
+				findfilter="-iname $1"
+				case "$2" in
+				-r)
+					recursive="";;
+				-q)
+					actquiet=1;;
+				-rq)
+					recursive=""
+					actquiet=1;;
+				-qr)
+					recursive=""
+					actquiet=1;;
+				esac
+			esac
+		fi
+	fi
+	
+	case "$entryerror" in
+		0) if [ $actquiet -eq 0 ]; then
+				echo Action: $actioncmd
+				echo The following files will be affected:
+				find . $recursive $findfilter $criteriaunit $findirection$criteriavalue -type f -not -path '*/\.*' -prune -exec ls -F --color -d {} \;
+				echo -en "Do you wish to continue? [yes|no]: "
+				read yno
+				case $yno in
+					[yY] | [yY][Ee][Ss] )
+						find . $recursive $findfilter $criteriaunit $findirection$criteriavalue -type f -not -path '*/\.*' -prune -exec $actioncmd {} $actiondest \;;;
+					*) echo "Abort.";;
+				esac
+			else
+				find . $recursive $findfilter $criteriaunit $findirection$criteriavalue -type f -not -path '*/\.*' -prune -exec $actioncmd {} $actiondest \;
+			fi;;
+		1) echo "Invalid Unit Specified.";;
+		2) echo "Invalid Integer Value.";;
+		3) echo "No Recognizable Action.";;
+		4) echo "Invalid Destination Directory.";;
+		*) echo "Unknown Error.";;
+	esac
+	set +f
+
+	if [ $entryerror -ne 0 ]; then
+		echo
+		echo "Usage: $origcmd <unit> <value> <action> [destination] ['namefilter'] [-qr]"
+		echo
+		echo Units:
+		echo -e "\t m \t minutes"
+		echo -e "\t h \t hours"
+		echo -e "\t d \t days \t\t D \t days since midnight"
+		echo -e "\t w \t weeks \t\t W \t weeks since midnight"
+		echo
+		echo Actions:
+		echo -e "\t cp \t copy"
+		echo -e "\t mv \t move"
+		echo -e "\t rm \t remove"
+		echo
+		echo Optional Parameters:
+		echo -e "\t -q \t quiet mode*"
+		echo -e "\t -r \t recursive search"
+		echo -e "\t -qr \t combined"
+		echo
+		echo -e "* Intended for automated/unattended processes - always verify any action"
+		echo
+		return 1
+	fi
+	return 0
+}
+
+# Before the given relative date
 function dirprev() {
-	set -f
-	criteriaunit=""
-	criteriavalue=0
-	valuemodifier=1
-	entryerror=0
-	findfilter=""
-	recursive="-maxdepth 1"
-	lsoptions=""
-	reinteger='^[0-9]+$'
-
-	case "$1" in
-		m) 
-			criteriaunit="-mmin";;
-		h) 
-			criteriaunit="-mmin"
-			valuemodifier=60;;
-		d) 
-			criteriaunit="-mtime";;
-		D) 
-			criteriaunit="-daystart -mtime";;
-		w) 
-			criteriaunit="-mtime"
-			valuemodifier=7;;
-		W) 
-			criteriaunit="-daystart -mtime"
-			valuemodifier=7;;
-		*)
-			entryerror=1;;
-	esac
-
-	if [ $entryerror -eq 0 ]; then
-		shift
-		if [[ $1 =~ $reinteger ]]; then criteriavalue=$(($1*$valuemodifier)); else entryerror=2; fi
-	fi
-	if [ $entryerror -eq 0 ]; then
-		shift
-		if [ "$1" != "" ]; then
-			case "$1" in
-			-r)
-				recursive="";;
-			-l)
-				lsoptions=" -l";;
-			-rl)
-				recursive=""
-				lsoptions=" -l";;
-			-lr)
-				recursive=""
-				lsoptions=" -l";;
-			*)
-				findfilter="-iname $1"
-				case "$2" in
-					-r)
-						recursive="";;
-					-l)
-						lsoptions=" -l";;
-					-rl)
-						recursive=""
-						lsoptions=" -l";;
-					-lr)
-						recursive=""
-						lsoptions=" -l";;
-				esac
-			esac
-		fi
-	fi
-	
-	case "$entryerror" in
-		0) if [ "$recursive" == "" ] || [ "$lsoptions" == " -l" ]; then
-				find . $recursive $findfilter $criteriaunit +$criteriavalue -type f -not -path '*/\.*' -prune -exec ls $lsoptions -F --color -d {} \;
-			else
-				find . $recursive $findfilter $criteriaunit +$criteriavalue -type f -not -path '*/\.*' -prune -exec ls -F --color -d {} \; | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?([^\e]{20})[^\e]*(?:\.\/)?(.*)/$1$2...$3/s;s/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?(.*)/$1$2/s;print' | column -x
-			fi;;
-		1) echo "Invalid Unit Specified.";;
-		2) echo "Invalid Integer Value.";;
-		*) echo "Unknown Error.";;
-	esac
-	set +f
-	if [ $entryerror -ne 0 ]; then
-		echo
-		echo "Usage: dirprev <unit> <value> ['namefilter'] [-lr]"
-		echo
-		echo Units:
-		echo -e "\t m \t minutes"
-		echo -e "\t h \t hours"
-		echo -e "\t d \t days \t\t D \t days since midnight"
-		echo -e "\t w \t weeks \t\t W \t weeks since midnight"
-		echo
-		echo Optional Parameters:
-		echo -e "\t -l \t list view"
-		echo -e "\t -r \t recursive search"
-		echo -e "\t -lr \t combined"
-		echo
-		return 1
-	fi
-	return 0
+	dir-core dirprev + $@
 }
-
-# Set action for files of recent time frame
-function actlast() {
-	set -f
-	criteriaunit=""
-	criteriavalue=0
-	valuemodifier=1
-	entryerror=0
-	findfilter=""
-	actioncmd=""
-	actiondest=""
-	recursive="-maxdepth 1"
-	actquiet=0
-	reinteger='^[0-9]+$'
-
-	case "$1" in
-		m) 
-			criteriaunit="-mmin";;
-		h) 
-			criteriaunit="-mmin"
-			valuemodifier=60;;
-		d) 
-			criteriaunit="-mtime";;
-		D) 
-			criteriaunit="-daystart -mtime";;
-		w) 
-			criteriaunit="-mtime"
-			valuemodifier=7;;
-		W) 
-			criteriaunit="-daystart -mtime"
-			valuemodifier=7;;
-		*)
-			entryerror=1;;
-	esac
-
-	if [ $entryerror -eq 0 ]; then
-		shift
-		if [[ $1 =~ $reinteger ]]; then criteriavalue=$(($1*$valuemodifier)); else entryerror=2; fi
-	fi
-	
-	if [ $entryerror -eq 0 ]; then
-		shift
-		case "$1" in
-			cp|mv) 
-				actioncmd=$1
-				actiondest=$2
-				if ! [ -d $actiondest ]; then entryerror=4; fi
-				shift;;
-			rm) 
-				actioncmd=$1;;
-			*)
-				entryerror=3;;
-		esac
-	fi
-
-	if [ $entryerror -eq 0 ]; then
-		shift
-		if [ "$1" != "" ]; then
-			case "$1" in
-			-r)
-				recursive="";;
-			-q)
-				actquiet=1;;
-			-rq)
-				recursive=""
-				actquiet=1;;
-			-qr)
-				recursive=""
-				actquiet=1;;
-			*)
-				findfilter="-iname $1"
-				case "$2" in
-				-r)
-					recursive="";;
-				-q)
-					actquiet=1;;
-				-rq)
-					recursive=""
-					actquiet=1;;
-				-qr)
-					recursive=""
-					actquiet=1;;
-				esac
-			esac
-		fi
-	fi
-	
-	case "$entryerror" in
-		0) if [ $actquiet -eq 0 ]; then
-				echo Action: $actioncmd
-				echo The following files will be affected:
-				find . $recursive $findfilter $criteriaunit -$criteriavalue -type f -not -path '*/\.*' -prune -exec ls -F --color -d {} \;
-				echo -en "Do you wish to continue? [yes|no]: "
-				read yno
-				case $yno in
-					[yY] | [yY][Ee][Ss] )
-						find . $recursive $findfilter $criteriaunit -$criteriavalue -type f -not -path '*/\.*' -prune -exec $actioncmd {} $actiondest \;;;
-					*) echo "Abort.";;
-				esac
-			else
-				find . $recursive $findfilter $criteriaunit -$criteriavalue -type f -not -path '*/\.*' -prune -exec $actioncmd {} $actiondest \;
-			fi;;
-		1) echo "Invalid Unit Specified.";;
-		2) echo "Invalid Integer Value.";;
-		3) echo "No Recognizable Action.";;
-		4) echo "Invalid Destination Directory.";;
-		*) echo "Unknown Error.";;
-	esac
-	set +f
-	if [ $entryerror -ne 0 ]; then
-		echo
-		echo "Usage: actlast <unit> <value> <action> [destination] ['namefilter'] [-qr]"
-		echo
-		echo Units:
-		echo -e "\t m \t minutes"
-		echo -e "\t h \t hours"
-		echo -e "\t d \t days \t\t D \t days since midnight"
-		echo -e "\t w \t weeks \t\t W \t weeks since midnight"
-		echo
-		echo Actions:
-		echo -e "\t cp \t copy"
-		echo -e "\t mv \t move"
-		echo -e "\t rm \t remove"
-		echo
-		echo Optional Parameters:
-		echo -e "\t -q \t quiet mode"
-		echo -e "\t -r \t recursive search"
-		echo -e "\t -qr \t combined"
-		echo
-		return 1
-	fi
-	return 0
-}
-
-# Set action for files of previous time frame
 function actprev() {
-	set -f
-	criteriaunit=""
-	criteriavalue=0
-	valuemodifier=1
-	entryerror=0
-	findfilter=""
-	actioncmd=""
-	actiondest=""
-	recursive="-maxdepth 1"
-	actquiet=0
-	reinteger='^[0-9]+$'
+	act-core actprev + $@
+}
 
-	case "$1" in
-		m) 
-			criteriaunit="-mmin";;
-		h) 
-			criteriaunit="-mmin"
-			valuemodifier=60;;
-		d) 
-			criteriaunit="-mtime";;
-		D) 
-			criteriaunit="-daystart -mtime";;
-		w) 
-			criteriaunit="-mtime"
-			valuemodifier=7;;
-		W) 
-			criteriaunit="-daystart -mtime"
-			valuemodifier=7;;
-		*)
-			entryerror=1;;
-	esac
-
-	if [ $entryerror -eq 0 ]; then
-		shift
-		if [[ $1 =~ $reinteger ]]; then criteriavalue=$(($1*$valuemodifier)); else entryerror=2; fi
-	fi
-	
-	if [ $entryerror -eq 0 ]; then
-		shift
-		case "$1" in
-			cp|mv) 
-				actioncmd=$1
-				actiondest=$2
-				if ! [ -d $actiondest ]; then entryerror=4; fi
-				shift;;
-			rm) 
-				actioncmd=$1;;
-			*)
-				entryerror=3;;
-		esac
-	fi
-
-	if [ $entryerror -eq 0 ]; then
-		shift
-		if [ "$1" != "" ]; then
-			case "$1" in
-			-r)
-				recursive="";;
-			-q)
-				actquiet=1;;
-			-rq)
-				recursive=""
-				actquiet=1;;
-			-qr)
-				recursive=""
-				actquiet=1;;
-			*)
-				findfilter="-iname $1"
-				case "$2" in
-				-r)
-					recursive="";;
-				-q)
-					actquiet=1;;
-				-rq)
-					recursive=""
-					actquiet=1;;
-				-qr)
-					recursive=""
-					actquiet=1;;
-				esac
-			esac
-		fi
-	fi
-	
-	case "$entryerror" in
-		0) if [ $actquiet -eq 0 ]; then
-				echo Action: $actioncmd
-				echo The following files will be affected:
-				find . $recursive $findfilter $criteriaunit +$criteriavalue -type f -not -path '*/\.*' -prune -exec ls -F --color -d {} \;
-				echo -en "Do you wish to continue? [yes|no]: "
-				read yno
-				case $yno in
-					[yY] | [yY][Ee][Ss] )
-						find . $recursive $findfilter $criteriaunit +$criteriavalue -type f -not -path '*/\.*' -prune -exec $actioncmd {} $actiondest \;;;
-					*) echo "Abort.";;
-				esac
-			else
-				find . $recursive $findfilter $criteriaunit +$criteriavalue -type f -not -path '*/\.*' -prune -exec $actioncmd {} $actiondest \;
-			fi;;
-		1) echo "Invalid Unit Specified.";;
-		2) echo "Invalid Integer Value.";;
-		3) echo "No Recognizable Action.";;
-		4) echo "Invalid Destination Directory.";;
-		*) echo "Unknown Error.";;
-	esac
-	set +f
-	if [ $entryerror -ne 0 ]; then
-		echo
-		echo "Usage: actprev <unit> <value> <action> [destination] ['namefilter'] [-qr]"
-		echo
-		echo Units:
-		echo -e "\t m \t minutes"
-		echo -e "\t h \t hours"
-		echo -e "\t d \t days \t\t D \t days since midnight"
-		echo -e "\t w \t weeks \t\t W \t weeks since midnight"
-		echo
-		echo Actions:
-		echo -e "\t cp \t copy"
-		echo -e "\t mv \t move"
-		echo -e "\t rm \t remove"
-		echo
-		echo Optional Parameters:
-		echo -e "\t -q \t quiet mode"
-		echo -e "\t -r \t recursive search"
-		echo -e "\t -qr \t combined"
-		echo
-		return 1
-	fi
-	return 0
+# After the given relative date
+function dirlast() {
+	dir-core dirlast - $@
+}
+function actlast() {
+	act-core actlast - $@
 }
