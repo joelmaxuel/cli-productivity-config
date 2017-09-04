@@ -3,9 +3,12 @@
 
 # Change Directory Below
 function cdb() {
+  CWD=$PWD
   select dir in $(find -type d -name "$1" -not -path '*/\.*' -prune);
   do
-    command cd "${dir}" && break;
+    command cd "${dir}"
+	pushd -n $CWD &> /dev/null
+	break
   done 
 }
 
@@ -21,13 +24,13 @@ function cd ()
   fi
 }
 
-# Menu-based Change Directory
-function mcd() {
+# Change Directory History
+function cdh() {
   CWD=$PWD
   select dir in $(dirs -p -l | sort | uniq);
   do
     command cd "${dir}"
-	pushd $CWD &> /dev/null
+	pushd -n $CWD &> /dev/null
 	break
   done 
 }
