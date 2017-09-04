@@ -155,7 +155,7 @@ function dir-core() {
 		0) if [ "$recursive" == "" ] || [ "$lsoptions" == " -l" ]; then
 				find . $recursive $findfilter $criteriaunit $findirection$criteriavalue -type f -not -path '*/\.*' -prune -exec ls $lsoptions -F --color -d {} \;
 			else
-				find . $recursive $findfilter $criteriaunit $findirection$criteriavalue -type f -not -path '*/\.*' -prune -exec ls -F --color -d {} \; | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?([^\e]{20})[^\e]*(?:\.\/)?(.*)/$1$2...$3/s;s/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?(.*)/$1$2/s;print' | column -x
+				find . $recursive $findfilter $criteriaunit $findirection$criteriavalue -type f -not -path '*/\.*' -prune -exec ls -F --color -d {} \; | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?(.*)/$1$2/s;s/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?([^\e]{20})[^\e]*(?:\.\/)?(.*)/$1$2...$3/s;print' | column -x
 			fi;;
 		1) echo "Invalid Unit Specified.";;
 		2) echo "Invalid Integer Value.";;

@@ -93,7 +93,7 @@ function dir-core
 				eval $findcommand
 			else
 				set findcommand "find . $findparams -type f -not -path '*/\.*' -prune -exec ls -F --color -d '{}' \;"
-				eval $findcommand | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?([^\e]{20})[^\e]*(?:\.\/)?(.*)/$1$2...$3/s;s/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?(.*)/$1$2/s;print' | column -x
+				eval $findcommand | perl -lne 's/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?(.*)/$1$2/s;s/((?:\e\[\d+(?:;\d+)?m)*)(?:\.\/)?([^\e]{20})[^\e]*(?:\.\/)?(.*)/$1$2...$3/s;print' | column -x
 			end
 		case 1
 			echo "Invalid Unit Specified."
