@@ -4,23 +4,44 @@
 # Change Directory Below
 function cdb() {
   CWD=$PWD
-  select dir in $(find -type d -name "$1" -not -path '*/\.*' -prune);
-  do
-    command cd "${dir}"
+  all_dirs=(`find -type d -name "$1" -not -path '*/\.*' -prune`);
+  if [[ -z ${all_dirs[0]} ]] ; then
+    echo "No matches found."
+    return 0
+  fi
+
+  # Automatically go to directory if only one result
+  if [[ ${#all_dirs[@]} -eq 1 ]] ; then
+    builtin cd ${all_dirs[0]}
 	pushd -n $CWD &> /dev/null
-	break
+    return 0
+  fi
+
+  # Ask the user which directory from their results they want to cd to.
+  select dir in $(echo ${all_dirs[@]});
+  do
+    builtin cd "${dir}"
+    pushd -n $CWD &> /dev/null
+    break
   done 
+
 }
 
-#let cd also pushd directories into stack. Use popd to reverse stack
+# Override builtin to make use of pushd/popd/dirs
 function cd ()
 {
   if [ $# -eq 0 ]; then
-    pushd $HOME &> /dev/null
-    command cd $HOME && return 0;
+    pushd -n $PWD &> /dev/null   #save current, dont display full stack 
+    builtin cd $HOME && return 0;
+  fi
+  if [ "$1" == "-" ]; then
+    pushd &> /dev/null && return 0;
   fi
   if [ -e $1 ]; then 
-    pushd $1 &> /dev/null   #dont display current stack 
+    pushd -n $PWD &> /dev/null   #save current, dont display full stack 
+	builtin cd $1	#go to dir
+  else
+	echo cd: $1: No such file or directory
   fi
 }
 
@@ -29,7 +50,7 @@ function cdh() {
   CWD=$PWD
   select dir in $(dirs -p -l | sort | uniq);
   do
-    command cd "${dir}"
+    builtin cd "${dir}"
 	pushd -n $CWD &> /dev/null
 	break
   done 
@@ -70,7 +91,7 @@ function mked() {
 
 # Track runtime of a program and return one value on exit
 function timer() {
-	/usr/bin/time -f "\t Ran for %E min:sec" "$@"
+	command time -f "\t Ran for %E min:sec" "$@"
 }
 
 # Directory listing with columns and colour
