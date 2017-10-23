@@ -359,3 +359,91 @@ function dirlast() {
 function actlast() {
 	act-core actlast - $@
 }
+
+# Change Directory By First Letter
+function cdfl {
+	CWD=$PWD
+	set -f
+	initial_path=$1
+	initial_char=""
+	next_level=""
+	low_level=0
+	operate_find=0
+	final_path=("")
+	working_path=("")
+	findcommand=""
+	
+	if [[ $initial_path == "$HOME"* ]]; then
+		initial_path=~${initial_path#$HOME}
+	fi
+	
+	for (( i=0; i<${#initial_path}; i++ )); do
+		initial_char=${initial_path:$i:1}
+		low_level=0
+		operate_find=0
+		case "$initial_char" in
+			.)
+				next_level="..";;
+			/)
+				next_level="/"
+				low_level=1;;
+			'~')
+				next_level="~"
+				low_level=1;;
+			*)
+				next_level=$initial_char
+				operate_find=1;;
+		esac
+		if [[ $low_level -eq 1 && $i -eq 0 ]] ; then
+			final_path[0]=$next_level
+			if [ $next_level == "~" ] ; then
+				final_path[0]="$HOME/"
+			fi
+		else
+			if [ $operate_find -eq 1 ] ; then
+				working_path=("")
+				for (( j=0; j<${#final_path[@]}; j++ )); do
+					findcommand="find ${final_path[$j]} -maxdepth 1 -type d -name '$next_level*' -o -type l -name '$next_level*'"
+					findcommand+=" 2>&1 | grep -v \"Permission denied\""
+					if [[ -z ${working_path[0]} ]] ; then
+						working_path=( $(eval $findcommand) )
+					else
+						working_path+=( $(eval $findcommand) )
+					fi
+				done
+			else
+				for (( j=0; j<${#final_path[@]}; j++ )); do
+					if [[ -z ${final_path[$j]} ]] ; then 
+						working_path[$j]=$next_level
+					else
+						working_path[$j]=${final_path[$j]}/$next_level
+					fi
+				done
+			fi
+			final_path=("${working_path[@]}")
+		fi
+	done
+	set +f
+	
+	all_dirs=("${final_path[@]}")
+    if [[ -z ${all_dirs[0]} ]] ; then
+        echo "No matches found."
+        return 0
+    fi
+
+	# Automatically go to directory if only one result
+    if [[ ${#all_dirs[@]} -eq 1 ]] ; then
+		builtin cd ${all_dirs[0]}
+		pushd -n $CWD &> /dev/null
+        return 0
+    fi
+
+	# Ask the user which directory from their results they want to cd to.
+	select dir in $(echo ${all_dirs[@]});
+	do
+		builtin cd "${dir}"
+		pushd -n $CWD &> /dev/null
+		break
+	done 
+
+}
