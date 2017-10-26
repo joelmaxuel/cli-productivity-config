@@ -10,6 +10,8 @@ Designed for Bash and fish for the Linux shell, this repo is a collection of scr
 
 Inspired by a friend who runs DOS to this day - he has over a thousand batch files to improve (and simplify) his command line experience.  Although many are situational (based on his personal directory structure, for example), it has and will give me inspiration for something similar in Linux.
 
+More info can be found on [my home page](http://www.chebucto.ns.ca/~bb782/proj-cpc.html) or [XDA](http://forum.xda-developers.com/showthread.php?t=3693743)
+
 
 
 ### SYSTEM REQUIREMENTS:
@@ -31,5 +33,3 @@ Run one (or both) of the INSTALL scripts (in terminal), and the new files will b
 I will be checking this git on occasion.  So if you have a bug, open an issue.  If you have a contribution, feel free to fork, add to, and submit a pull request.  Feature requests can be helpful too (via an issue), as long as they are backed up with a concept of the idea.  Asking for "puppies and rainbows" are not helpful.  
 
 I am sharing these to help benefit others, so please link, redistribute, and do what you want with them (within the confines of the GPL of course).
-
-Thank you.
