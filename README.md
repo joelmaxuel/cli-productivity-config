@@ -6,11 +6,11 @@
 
 ### INTRODUCTION:
 
-Designed for Bash and fish for the Linux shell, this repo is a collection of scripts to, as said above, allow the end user to be more productive.
+Designed for Bash and fish for the Linux shell, CLI Productivity Config (CLIPC) is a collection of scripts to, as said above, allow the end user to be more productive.
 
 Inspired by a friend who runs DOS to this day - he has over a thousand batch files to improve (and simplify) his command line experience.  Although many are situational (based on his personal directory structure, for example), it has and will give me inspiration for something similar in Linux.
 
-More info can be found on [my home page](http://www.chebucto.ns.ca/~bb782/proj-cpc.html) or [XDA](http://forum.xda-developers.com/showthread.php?t=3693743)
+More info can be found on [my home page](http://www.chebucto.ns.ca/~bb782/proj-clipc.html) or [XDA](http://forum.xda-developers.com/showthread.php?t=3693743)
 
 
 
@@ -24,7 +24,11 @@ More info can be found on [my home page](http://www.chebucto.ns.ca/~bb782/proj-c
 
 ### INSTALLATION:
 
-Run one (or both) of the INSTALL scripts (in terminal), and the new files will be copied in place.  Then, restart any open terminals to take advantage of the changes.  That's all there is to it!
+Run one (or both) of the INSTALL scripts (in terminal), and the new files will be copied in place.  Then, restart any open terminals to take advantage of the changes.
+
+Note: If there were specific additions/changes to the .bashrc file, the Bash install will overwrite that (with the old version renamed to .bashrc-bak).  To easily maintain these between CLIPC updates, place the changes in ~/.bash_extras (no header in file needed) and Bash will automatically include that file (the CLIPC install script will never alter the .bash_extras file).
+
+That's all there is to it!
 
 
 

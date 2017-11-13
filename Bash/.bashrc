@@ -101,7 +101,7 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-# Define separate file for (CPC) functions
+# Define separate file for (CLIPC) functions
 
 if [ -f ~/.bash_functions ]; then
     . ~/.bash_functions
