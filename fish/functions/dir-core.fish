@@ -11,9 +11,10 @@ function dir-core
 	set -l recursive "-maxdepth 1 "
 	set -l lsoptions ""
 	set -l reinteger '^[0-9]+$'
-	set -l i 3
+	set -l i 2
 
-		if test (count $argv) -gt 0
+	if test (count $argv) -gt $i
+		set i (math $i+1)
 		switch $argv[$i]
 			case m
 				set criteriaunit "-mmin"

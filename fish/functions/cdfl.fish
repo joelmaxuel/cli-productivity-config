@@ -38,11 +38,21 @@ function cdfl --description 'Change Directory By First Letter command'
 			if test $operate_find -eq 1
 				set working_path
 				for j in (seq 1 (count $final_path))
-					set findcommand "find $final_path[$j] -maxdepth 1 \( -type d -o -type l \) -name '$next_level*'"
+					set findcommand "find -L $final_path[$j] -maxdepth 1 -type d -name '$next_level*'"
 					if test -z $working_path[1]
 						set working_path (eval $findcommand 2>&1 | grep -v "Permission denied")
 					else
 						set working_path $working_path (eval $findcommand 2>&1 | grep -v "Permission denied")
+					end
+					set klimit (count $working_path)
+					set k 1
+					while test $klimit -ge $k
+						if test $final_path[$j] = $working_path[$k]
+							set -e working_path[$k]
+							set klimit (math $klimit-1)
+						else
+							set k (math $k+1)
+						end
 					end
 				end
 			else

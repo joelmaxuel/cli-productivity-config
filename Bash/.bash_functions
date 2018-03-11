@@ -403,13 +403,20 @@ function cdfl {
 			if [ $operate_find -eq 1 ] ; then
 				working_path=("")
 				for (( j=0; j<${#final_path[@]}; j++ )); do
-					findcommand="find ${final_path[$j]} -maxdepth 1 -type d -name '$next_level*' -o -type l -name '$next_level*'"
+					findcommand="find -L ${final_path[$j]} -maxdepth 1 -type d -name '$next_level*'"
 					findcommand+=" 2>&1 | grep -v \"Permission denied\""
 					if [[ -z ${working_path[0]} ]] ; then
 						working_path=( $(eval $findcommand) )
 					else
 						working_path+=( $(eval $findcommand) )
 					fi
+					for (( k=0; k<${#working_path[@]}; k++ )); do
+						if [[ ${final_path[$j]} != ${working_path[$k]} ]] ; then
+							trimmed_path+=("${working_path[$k]}")
+						fi
+					done
+					working_path=("${trimmed_path[@]}")
+					unset trimmed_path
 				done
 			else
 				for (( j=0; j<${#final_path[@]}; j++ )); do
