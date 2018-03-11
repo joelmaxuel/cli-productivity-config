@@ -19,14 +19,15 @@ More info can be found on [my home page](http://www.chebucto.ns.ca/~bb782/proj-c
 - GNU Bash (I am using 4.4, but the requirements are probably way lower) and/or
 - fish, version 2.4.0 (quickly found myself upgrading to Debian Stretch for this)
 - BSDMainUtils, version 9.0.7 (this version ignores escape sequences) or higher
-
+- git (any version will do - as long as it has `add` and `status` - so yeah, any)
+- GNU time, version 1.7 (although the real requirement may be much older)
 
 
 ### INSTALLATION:
 
-Run one (or both) of the INSTALL scripts (in terminal), and the new files will be copied in place.  Then, restart any open terminals to take advantage of the changes.
+Run the INSTALL script (in terminal), follow the interactive choices, and (based on your selections) the new files will be copied in place.  Then, restart any open terminals to take advantage of the changes.
 
-Note: If there were specific additions/changes to the .bashrc file, the Bash install will overwrite that (with the old version renamed to .bashrc-bak).  To easily maintain these between CLIPC updates, place the changes in ~/.bash_extras (no header in file needed) and Bash will automatically include that file (the CLIPC install script will never alter the .bash_extras file).
+Note: If there were specific additions/changes to the .bashrc file, the Bash install will overwrite that (with the old version renamed to .bashrc-bak).  To easily maintain these between CLIPC updates, place the changes in ~/.bash_extras (no header in file needed) and Bash will automatically include that file (the CLIPC install script will never overwrite the .bash_extras file).
 
 That's all there is to it!
 

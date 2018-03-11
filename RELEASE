@@ -1,0 +1,68 @@
+CLI Productivity Config
+A series of functions to improve the shell experience
+
+** TL;DR: if starting an install, attention should at least be paid to the last bullet above the FUNCTIONS section below. **
+
+
+RELEASE NOTES
+
+Although a more thorough explanation of this project's contents can be found using the external links in the README.md or even the git log, the purpose of this document is to serve as orientation ahead of installation.
+
+
+SYSTEM REQUIREMENTS
+
+For a fully satisfying shell experience, CLIPC recommends at least:
+
+- GNU Bash (version 4.3) and/or
+- fish (version 2.4.0)
+- BSDMainUtils (version 9.0.7)
+- git (any version will do)
+- GNU time (version 1.7)
+
+To ensure dependencies are met, execute the following command - adapt if not using a Debian or Debian-based (such as Ubuntu) distribution - before or after installing CLIPC:
+
+	apt-get install bsdmainutils git time
+
+
+INSTALLATION
+
+Depending on which shell you use, choose the appropriate option in the install script.  There are implications with the install, however:
+
+- The added functions will only apply to the current user.  If you use multiple user accounts, the other accounts will not be aware of the added functions.  If you use sudo, the root account will be unaware of the functions as well.  For either case, running the install script under any additional users (including root) should (the latter scenario has had little testing thus far) alleviate the situation.  For a system with many (new) users to hold the benefit of CLIPC, /etc/skel can help.
+
+- Any core (i.e. not related to install) CLIPC scripts have the option to be installed globally (if superuser rights exist), if at all.  By default however, they will remain specific to the user and may face caveats as noted above.
+
+- For Bash: The change directory (cd) builtin has been overridden to take advantage of the pushd/popd/dirs directory stack (a philosophy which fish already makes use of).  Such a change is sometimes criticized as being a trait of a madman (thanks for the vote of confidence Wendell), but it gets worse than that.  The override has been done in such a way as to insert the current directory into the stack and then go to the next directory, versus going there and marking it in the stack.  The former has made for more complicated code, but makes the stack look more like fish's in the end.  The section is getting long but reversing the override will break `cdh` altogether and maim a few other functions.
+
+- For Bash: Given the configuration philosophy Bash has taken, it is difficult to sense, let alone reconcile changes to .bashrc.  CLIPC stores the functions in a separate file, however to call the functions, a backup of .bashrc will be made (.bashrc-bak) before replacing it.  If you have anything custom there and wish to use CLIPC, the easy solution is to place any customizations in .bash_extras as the install script will never overwrite that (it may append a custom path declaration if allowed to).  The "difficult" solution is to avoid the install script, opting to reconcile changes between the .bashrc's and replacing .bash_functions, manually.
+
+- After the functions are installed, you will be asked if you want script tools installed as well.  These scripts, written for Bash (can be used for any shell due to how they are spawned), are meant as add-ons for certain tasks.  If wondering where these should be installed, (e.g. system-wide such as '/usr/local/bin' means available for anyone although the install will either need to be done as root or as sudo) if at all, continue reading below in the SCRIPTS section (for a quick description of each available) to help make a determination.
+
+
+FUNCTIONS
+
+cdb: Change-Directory-Below - Performs a search (based on name) below the current working directory to change to any specified matched directory.
+
+cdfl: Change-Directory-by-First-Letter - Move anywhere in the filesystem without having to type out or tab through a full path - enter the first letter of every path level instead.
+
+cdh: Change-Directory-History - Displays a history of recently visited directories to allow changing back to one of them.
+
+clihelp: Command-Line-Interface-Helper - Provides a message about common keyboard shortcuts.  Can also be invoked by ^h shortcut.
+
+dirw: Directory-list-Wide-view - A compact listing of the current directory with colour, truncates long names.  Can also be invoked by ^l shortcut.
+
+dirlast / dirprev / actlast / actprev: Based on which used, either display or act (cp, mv or rm) upon files that match a certain age, whether newer (dirlast/actlast) or older (dirprev/actprev).
+
+editadd: Edit-then-git-Add - Opens a file in your default editor, and then marks it for inclusion in the next git commit.
+
+sudo!!: fish only (Bash already has `sudo !!`) - Repeats the last command, with sudo preceeded.  The concept can also be invoked in either shell by ^s shortcut.
+
+timer: A cut down 'time' command showing only the "wall clock" time a command has run for.
+
+
+SCRIPTS
+
+<currently none available>
+
+
+EOF
