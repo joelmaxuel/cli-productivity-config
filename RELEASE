@@ -18,10 +18,11 @@ For a fully satisfying shell experience, CLIPC recommends at least:
 - BSDMainUtils (version 9.0.7)
 - git (any version will do)
 - GNU time (version 1.7)
+- wakeonlan (any version)
 
 To ensure dependencies are met, execute the following command - adapt if not using a Debian or Debian-based (such as Ubuntu) distribution - before or after installing CLIPC:
 
-	apt-get install bsdmainutils git time
+	apt-get install bsdmainutils git time wakeonlan
 
 
 INSTALLATION
@@ -62,7 +63,7 @@ timer: A cut down 'time' command showing only the "wall clock" time a command ha
 
 SCRIPTS
 
-<currently none available>
+wakessh: Wakeup-computer-and-SSH-in - Invokes Wake-On-LAN (WOL) for a PC defined by a profile, then remotes into the system once online.
 
 
 EOF

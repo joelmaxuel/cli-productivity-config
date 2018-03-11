@@ -1,0 +1,138 @@
+#!/bin/bash
+
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+	echo
+	echo -e "WakeSSH"
+	echo -e "Part of the CLI Productivity Config, 2018"
+	echo
+	echo -e "Usage: wakessh [-P profile] [user] [-d] [ssh-specific params]"
+	echo -e "       '-P/-d' parameters are case sensitive due to potential ssh invocation."
+	echo
+	echo -e "To add/edit profiles, open '~/.config/wakessh.conf' in your favourite editor."
+	echo -e "If it does not yet exist, running 'wakessh' (without help flags) will make a"
+	echo -e "basic template to follow.  Create at least a 'default' profile - which does not"
+	echo -e "need to be specified at the command line (ignores the need for '-P' parameter)."
+	echo -e "'-d' flag debugs details provided.  Thge order of parameters are important."
+	echo
+	exit 0
+fi
+
+# Check if conf file exists.  If not, prep one and exit.
+if [ ! -f ~/.config/wakessh.conf ]; then
+	echo "Profile config file not found.  Creating one..."
+	if [ ! -d ~/.config ]; then
+		mkdir ~/.config
+	fi
+	touch ~/.config/wakessh.conf
+	echo -e "# WakeSSH Profile Configuration" >> ~/.config/wakessh.conf
+	echo -e "# Stores MAC address, hostname/IP and (optionally) username/port per profile." >> ~/.config/wakessh.conf
+	echo -e "# Precedence of  '#' disables the profile. Set at least a 'default' profile." >> ~/.config/wakessh.conf
+	echo -e "# Each profile is on it's own line, separated by a semicolon.  Example:" >> ~/.config/wakessh.conf
+	echo -e "# sample;aa:bb:cc:dd:ee:ff;remote;user;2222" >> ~/.config/wakessh.conf
+	echo -e "# " >> ~/.config/wakessh.conf
+	echo "Configuration file generated.  Please add any profiles to ~/.config/wakessh.conf beofre continuing."
+	exit 1
+fi
+
+# Get the profile and details
+if [ "$1" == "-P" ]; then
+	shift
+	SSHPF=$1
+	shift
+else
+	SSHPF="default"
+fi
+
+IFS=';' read -a SSHCF <<<$(grep "^$SSHPF\w*;\b" --color=never -m 1 ~/.config/wakessh.conf)
+
+if [ ${#SSHCF[@]} -lt 3 ]; then
+	echo -e "$SSHPF not defined (need at least MAC address and host/IP)"
+	echo -e "Please edit '~/.config/wakessh.conf' to use this profile."
+	exit 1
+fi
+
+# Host's MAC address
+MAC=${SSHCF[1]}
+
+# Define host name/IP
+HOST=${SSHCF[2]}
+
+# Define default user name (grab from profile or at least current user, override if defined)
+if [ ${#SSHCF[@]} -lt 4 ]; then
+	SSHUN=$USER
+else
+	SSHUN=${SSHCF[3]}
+fi
+if [[ ! -z "$1" && $1 != -* ]]; then
+	SSHUN=$1
+	shift
+fi
+
+# Define port number
+if [ ${#SSHCF[@]} -lt 5 ]; then
+	SSHPT=""
+else
+	SSHPT="-p ${SSHCF[4]}"
+fi
+
+# Echo definitions if debug flag on
+if [[ "$1" == "-d" ]]; then
+	shift
+	echo
+	echo "Connection Details:"
+	echo "MAC: $MAC"
+	echo "HOST: $HOST"
+	echo "USER: $SSHUN"
+	echo "PORT: $SSHPT"
+	echo "EXTRAS: $@"
+	echo
+fi
+
+# Flag for SSH achievable
+SSH=0
+
+# Set up a quick ping to host to check if online already
+PING="ping -s 1 -c 2 $HOST > /dev/null"
+eval $PING
+if [ $? -eq 0 ];then
+	echo -e "$HOST is UP as checked on $(date +%H:%M)"
+	SSH=1
+else
+	wakeonlan $MAC | echo -e "$HOST not turned on. WOL packet sent at $(date +%H:%M)"
+	echo -n "Waiting a Minute."
+	sleep 20s
+	echo -n "."
+	sleep 20s
+	echo -n "."
+	sleep 20s
+	echo
+	# Prepare a while loop
+	WLOOP=0
+	# Set up a more comprehensive ping
+	PING="ping -s 1 -c 4 $HOST > /dev/null"
+	echo -n "Trying again..."
+	while [ $WLOOP -lt 12 ];do
+		eval $PING
+		if [ $? -eq 0 ];then
+			echo
+			echo -n "$HOST is UP as on $(date +%H:%M)"
+			SSH=1
+			WLOOP=16
+		else
+			echo -n "."
+			WLOOP=$(( $WLOOP + 1 ))
+			sleep 16
+		fi
+	done
+	echo
+	# Stop pinging, host is taking too long
+	if [ $WLOOP -eq 12 ];then		
+		echo "$HOST Not Responding - Please Check Network/System Connections"
+		exit 1
+	fi
+fi
+# Complete SSH if ready
+if [ $SSH -eq 1 ];then
+	echo "Attempting to SSH $SSHUN@$HOST..."
+	ssh $SSHPT $@ $SSHUN@$HOST
+fi
