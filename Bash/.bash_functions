@@ -1,32 +1,6 @@
 # ~/.bash_functions file, to store functions
 # created for the cli-productivity-config.
 
-# Change Directory Below
-function cdb() {
-  CWD=$PWD
-  all_dirs=(`find -type d -name "$1" -not -path '*/\.*' -prune`);
-  if [[ -z ${all_dirs[0]} ]] ; then
-    echo "No matches found."
-    return 0
-  fi
-
-  # Automatically go to directory if only one result
-  if [[ ${#all_dirs[@]} -eq 1 ]] ; then
-    builtin cd ${all_dirs[0]}
-	pushd -n $CWD &> /dev/null
-    return 0
-  fi
-
-  # Ask the user which directory from their results they want to cd to.
-  select dir in $(echo ${all_dirs[@]});
-  do
-    builtin cd "${dir}"
-    pushd -n $CWD &> /dev/null
-    break
-  done 
-
-}
-
 # Override builtin to make use of pushd/popd/dirs
 function cd ()
 {
@@ -45,13 +19,41 @@ function cd ()
   fi
 }
 
+# Commonize the circumvented cd command for functions
+function cd-core() {
+	CWD=$PWD
+	builtin cd "$1"
+	pushd -n $CWD &> /dev/null
+}
+
+# Change Directory Below
+function cdb() {
+  all_dirs=(`find -type d -name "$1" -not -path '*/\.*' -prune`);
+  if [[ -z ${all_dirs[0]} ]] ; then
+    echo "No matches found."
+    return 0
+  fi
+
+  # Automatically go to directory if only one result
+  if [[ ${#all_dirs[@]} -eq 1 ]] ; then
+    cd-core ${all_dirs[0]}
+    return 0
+  fi
+
+  # Ask the user which directory from their results they want to cd to.
+  select dir in $(echo ${all_dirs[@]});
+  do
+    cd-core "${dir}"
+    break
+  done 
+
+}
+
 # Change Directory History
 function cdh() {
-  CWD=$PWD
   select dir in $(dirs -p -l | sort | uniq);
   do
-    builtin cd "${dir}"
-	pushd -n $CWD &> /dev/null
+    cd-core "${dir}"
 	break
   done 
 }
@@ -360,11 +362,16 @@ function actlast() {
 	act-core actlast - $@
 }
 
-# Change Directory By First Letter
-function cdfl {
-	CWD=$PWD
+# Identify Directory By First Letter
+function fl-core {
 	set -f
+	given_action=$1
+	shift
 	initial_path=$1
+	shift
+	given_pre=$1
+	shift
+	given_post=$@
 	initial_char=""
 	next_level=""
 	low_level=0
@@ -438,19 +445,24 @@ function cdfl {
         return 0
     fi
 
-	# Automatically go to directory if only one result
+	# Automatically act if only one result
     if [[ ${#all_dirs[@]} -eq 1 ]] ; then
-		builtin cd ${all_dirs[0]}
-		pushd -n $CWD &> /dev/null
+		eval $given_action ${all_dirs[0]}
         return 0
     fi
 
-	# Ask the user which directory from their results they want to cd to.
+	# Ask the user which directory from their results they want
 	select dir in $(echo ${all_dirs[@]});
 	do
-		builtin cd "${dir}"
-		pushd -n $CWD &> /dev/null
+		eval $given_action "${dir}"
 		break
 	done 
 
+}
+
+# Change Directory By First Letter
+function cdfl {
+	set -f
+	fl-core cd-core "$1"
+	set +f
 }

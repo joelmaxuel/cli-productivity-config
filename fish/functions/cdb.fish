@@ -1,4 +1,4 @@
-function cdb --description 'Change Directory Below command'
+function cdb --description 'Change Directory Below'
 	set -l all_dirs (find -type d -name "$argv[1]" -not -path '*/\.*' -prune)
     if not set -q all_dirs[1]
         echo (_ 'No matches found.')
