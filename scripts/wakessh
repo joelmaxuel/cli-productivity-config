@@ -12,7 +12,7 @@ if [[ "$1" == "--help" || "$1" == "-h" ]]; then
 	echo -e "If it does not yet exist, running 'wakessh' (without help flags) will make a"
 	echo -e "basic template to follow.  Create at least a 'default' profile - which does not"
 	echo -e "need to be specified at the command line (ignores the need for '-P' parameter)."
-	echo -e "'-d' flag debugs details provided.  Thge order of parameters are important."
+	echo -e "'-d' flag debugs details provided.  The order of parameters are important."
 	echo
 	exit 0
 fi

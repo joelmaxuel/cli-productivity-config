@@ -50,6 +50,8 @@ cdh: Change-Directory-History - Displays a history of recently visited directori
 
 clihelp: Command-Line-Interface-Helper - Provides a message about common keyboard shortcuts.  Can also be invoked by ^h shortcut.
 
+cp2fl / mv2fl: Copy or Move to Target by First Letter - Quickly copy or move files without having to type out or tab through the full path.
+
 dirw: Directory-list-Wide-view - A compact listing of the current directory with colour, truncates long names.  Can also be invoked by ^l shortcut.
 
 dirlast / dirprev / actlast / actprev: Based on which used, either display or act (cp, mv or rm) upon files that match a certain age, whether newer (dirlast/actlast) or older (dirprev/actprev).

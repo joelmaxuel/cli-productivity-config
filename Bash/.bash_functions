@@ -447,14 +447,14 @@ function fl-core {
 
 	# Automatically act if only one result
     if [[ ${#all_dirs[@]} -eq 1 ]] ; then
-		eval $given_action ${all_dirs[0]}
+		eval $given_action $given_post "$given_pre" ${all_dirs[0]}
         return 0
     fi
 
 	# Ask the user which directory from their results they want
 	select dir in $(echo ${all_dirs[@]});
 	do
-		eval $given_action "${dir}"
+		eval $given_action $given_post "$given_pre" "${dir}"
 		break
 	done 
 
@@ -464,5 +464,61 @@ function fl-core {
 function cdfl {
 	set -f
 	fl-core cd-core "$1"
+	set +f
+}
+
+# Copy Files in Working Directory to One by First Letter
+function cp2fl {
+	if [[ "$1" == "" || "$1" == "--help" || "$1" == "-h" ]]; then
+		echo
+		echo -e "Copy Files in Working Directory to One by First Letter"
+		echo -e "Part of the CLI Productivity Config, 2018"
+		echo
+		echo -e "Usage: cp2fl destination [\"source filter\"] [cp-specific params]"
+		echo -e "       Destination uses the first-letter format for matching final path"
+		echo -e "       Source Filter assumes all non-hidden files when not defined"
+		echo
+		return 0
+	fi
+
+	set -f
+	given_dest=$1
+	shift
+	given_filter="*"
+	if [[ "$1" != "" ]]; then
+		given_filter=$1
+	fi
+	shift
+	given_extras=$@
+	
+	fl-core cp "$given_dest" "$given_filter" $given_extras
+	set +f
+}
+
+# Move Files in Working Directory to One by First Letter
+function mv2fl {
+	if [[ "$1" == "" || "$1" == "--help" || "$1" == "-h" ]]; then
+		echo
+		echo -e "Copy Files in Working Directory to One by First Letter"
+		echo -e "Part of the CLI Productivity Config, 2018"
+		echo
+		echo -e "Usage: mv2fl destination [\"source filter\"] [mv-specific params]"
+		echo -e "       Destination uses the first-letter format for matching final path"
+		echo -e "       Source Filter assumes all non-hidden files when not defined"
+		echo
+		return 0
+	fi
+
+	set -f
+	given_dest=$1
+	shift
+	given_filter="*"
+	if [[ "$1" != "" ]]; then
+		given_filter=$1
+	fi
+	shift
+	given_extras=$@
+	
+	fl-core mv "$given_dest" "$given_filter" $given_extras
 	set +f
 }

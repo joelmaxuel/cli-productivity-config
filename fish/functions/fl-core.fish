@@ -96,7 +96,7 @@ function fl-core
 
 	# Automatically if only one result
     if test $dirc -eq 1
-		eval $given_action $given_pre $all_dirs[1] $given_post
+		eval $given_action $given_post $given_pre $all_dirs[1]
         return 0
     end
 	
@@ -124,7 +124,7 @@ function fl-core
     set -l msg (_ 'Error: expected a number between 1 and %d or letter in that range, got "%s"')
     if string match -q -r '^\d+$' $choice
         if test $choice -ge 1 -a $choice -le $dirc
-            eval $given_action $given_pre $all_dirs[$choice] $given_post
+            eval $given_action $given_post $given_pre $all_dirs[$choice]
             return
         else
             printf "$msg\n" $dirc $choice
