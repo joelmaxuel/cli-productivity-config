@@ -9,10 +9,10 @@ if [[ "$1" == "--help" || "$1" == "-h" ]]; then
 	echo -e "       '-P/-d' parameters are case sensitive due to potential ssh invocation."
 	echo
 	echo -e "To add/edit profiles, open '~/.config/wakessh.conf' in your favourite editor."
-	echo -e "If it does not yet exist, running 'wakessh' (without help flags) will make a"
+	echo -e "If it does not exist yet, running 'wakessh' (without help flags) will make a"
 	echo -e "basic template to follow.  Create at least a 'default' profile - which does not"
 	echo -e "need to be specified at the command line (ignores the need for '-P' parameter)."
-	echo -e "'-d' flag debugs details provided.  The order of parameters are important."
+	echo -e "'-d' flag debug details are provided.  The order of parameters is important."
 	echo
 	exit 0
 fi
@@ -30,7 +30,7 @@ if [ ! -f ~/.config/wakessh.conf ]; then
 	echo -e "# Each profile is on it's own line, separated by a semicolon.  Example:" >> ~/.config/wakessh.conf
 	echo -e "# sample;aa:bb:cc:dd:ee:ff;remote;user;2222" >> ~/.config/wakessh.conf
 	echo -e "# " >> ~/.config/wakessh.conf
-	echo "Configuration file generated.  Please add any profiles to ~/.config/wakessh.conf beofre continuing."
+	echo "Configuration file generated.  Please add any profiles to ~/.config/wakessh.conf before continuing."
 	exit 1
 fi
 
